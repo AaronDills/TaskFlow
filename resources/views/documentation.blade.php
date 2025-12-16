@@ -14,7 +14,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col" x-data="{ activeSection: 'daily-schedule' }">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col" x-data="{ activeSection: 'overview' }">
             <!-- Header -->
             <header class="w-full py-4 px-6 lg:px-8 bg-white dark:bg-gray-800 shadow flex-shrink-0">
                 <nav class="max-w-7xl mx-auto flex items-center justify-between">
@@ -85,6 +85,16 @@
                 <!-- Sidebar - Left side on desktop -->
                 <aside id="doc-sidebar" class="w-64 bg-gray-800 dark:bg-gray-900 text-white flex-col hidden md:flex">
                     <nav class="flex-1 py-4">
+                        <!-- Overview -->
+                        <button @click="activeSection = 'overview'"
+                                :class="activeSection === 'overview' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-700'"
+                                class="w-full flex items-center px-4 py-3 transition-colors">
+                            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="ml-3">Overview</span>
+                        </button>
+
                         <!-- Daily Schedule -->
                         <button @click="activeSection = 'daily-schedule'"
                                 :class="activeSection === 'daily-schedule' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-700'"
@@ -152,6 +162,11 @@
                     <!-- Mobile Navigation (shown at top on small screens) -->
                     <div class="md:hidden bg-gray-800 dark:bg-gray-900 border-b border-gray-700 p-3 overflow-x-auto flex-shrink-0">
                         <div class="flex gap-2 min-w-max">
+                            <button @click="activeSection = 'overview'"
+                                    :class="activeSection === 'overview' ? 'bg-blue-600 text-white' : 'text-gray-300 bg-gray-700'"
+                                    class="px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap">
+                                Overview
+                            </button>
                             <button @click="activeSection = 'daily-schedule'"
                                     :class="activeSection === 'daily-schedule' ? 'bg-blue-600 text-white' : 'text-gray-300 bg-gray-700'"
                                     class="px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap">
@@ -188,6 +203,112 @@
                     <!-- Scrollable Content -->
                     <div class="flex-1 overflow-auto p-6 lg:p-10">
                     <div class="max-w-3xl">
+                        <!-- Overview Section -->
+                        <div x-show="activeSection === 'overview'" x-cloak>
+                            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Getting Started with TaskFlow</h1>
+                            <div class="prose dark:prose-invert max-w-none">
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                    TaskFlow helps you organize your projects, manage tasks, and stay on top of your schedule. Whether you're tackling a big project or just keeping track of daily to-dos, TaskFlow makes it easy to break things down and get them done.
+                                </p>
+
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">How It Works</h2>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                    TaskFlow is built around a simple idea: big projects become manageable when you break them into smaller pieces.
+                                </p>
+
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 my-6">
+                                    <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">Quick Example</h3>
+                                    <p class="text-blue-800 dark:text-blue-200 mb-3">
+                                        Let's say you need to clean the kitchen:
+                                    </p>
+                                    <ol class="list-decimal pl-6 text-blue-800 dark:text-blue-200 space-y-2">
+                                        <li>Create a project called "Kitchen" on the <strong>Projects</strong> page</li>
+                                        <li>Add tasks like "Clean" and "Organize"</li>
+                                        <li>Under those tasks, add specific steps like "Wipe down counters" or "Vacuum floor"</li>
+                                        <li>Go to the <strong>To-Do</strong> page to prioritize and work through your tasks</li>
+                                        <li>Check off tasks as you complete them</li>
+                                    </ol>
+                                </div>
+
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Main Features</h2>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-white">Projects</h4>
+                                            <p class="text-gray-600 dark:text-gray-300">Create projects to organize related tasks. Each project can have multiple tasks and subtasks.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-white">To-Do Page</h4>
+                                            <p class="text-gray-600 dark:text-gray-300">Your daily command center. See your schedule, prioritize tasks, and check them off as you work. Tasks not tied to a project can be created here too.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-white">Calendar</h4>
+                                            <p class="text-gray-600 dark:text-gray-300">Schedule appointments and events. Your calendar events show up on the To-Do page so you can plan your tasks around your commitments.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-white">History</h4>
+                                            <p class="text-gray-600 dark:text-gray-300">Look back at what you've accomplished. See your completed tasks organized by day and week.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-white">Timer</h4>
+                                            <p class="text-gray-600 dark:text-gray-300">Use the built-in timer to focus on a task for a set amount of time. Great for staying focused and avoiding distractions.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Where to Start</h2>
+                                <ol class="list-decimal pl-6 text-gray-600 dark:text-gray-300 space-y-3">
+                                    <li><strong>Create a project</strong> on the Projects page for something you're working on</li>
+                                    <li><strong>Add tasks</strong> to break the project into manageable pieces</li>
+                                    <li><strong>Visit the To-Do page</strong> each day to see what's recommended and plan your work</li>
+                                    <li><strong>Check off tasks</strong> as you complete them</li>
+                                    <li><strong>Review your History</strong> to see your progress over time</li>
+                                </ol>
+
+                                <p class="text-gray-600 dark:text-gray-300 mt-6">
+                                    Use the sidebar to learn more about each feature in detail.
+                                </p>
+                            </div>
+                        </div>
+
                         <!-- Daily Schedule Section -->
                         <div x-show="activeSection === 'daily-schedule'" x-cloak>
                             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Daily Schedule</h1>

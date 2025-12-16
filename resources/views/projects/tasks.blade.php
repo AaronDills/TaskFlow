@@ -72,11 +72,11 @@
                         <!-- Task List -->
                         <div class="space-y-4">
                             @forelse($parentTasks as $task)
-                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
-                                     x-data="{ expanded: true, editing: false, editTitle: '{{ $task->title }}', editDeadline: '{{ $task->deadline?->format('Y-m-d') ?? '' }}' }">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden {{ $task->on_hold ? 'opacity-60' : '' }}"
+                                     x-data="{ expanded: {{ $task->on_hold ? 'false' : 'true' }}, editing: false, editTitle: '{{ $task->title }}', editDeadline: '{{ $task->deadline?->format('Y-m-d') ?? '' }}', onHold: {{ $task->on_hold ? 'true' : 'false' }} }">
                                     <!-- Task Header -->
                                     <div class="p-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-700"
-                                         :class="{ 'bg-green-50 dark:bg-green-900/20': {{ $task->completed ? 'true' : 'false' }} }">
+                                         :class="{ 'bg-green-50 dark:bg-green-900/20': {{ $task->completed ? 'true' : 'false' }}, 'bg-gray-100 dark:bg-gray-700/50': onHold && !{{ $task->completed ? 'true' : 'false' }} }">
                                         <!-- Expand/Collapse -->
                                         <button @click="expanded = !expanded" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                                             <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,6 +95,9 @@
                                                     Due {{ $task->deadline->format('M j') }}
                                                 </span>
                                             @endif
+                                            <span x-show="onHold" class="ml-2 text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                On Hold
+                                            </span>
                                         </div>
 
                                         <!-- Edit Form -->
@@ -119,6 +122,13 @@
                                         </span>
 
                                         <!-- Actions -->
+                                        <button @click="toggleOnHold({{ $task->id }})"
+                                                class="text-sm px-2 py-1 rounded"
+                                                :class="onHold ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200' : 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'"
+                                                :title="onHold ? 'Resume task' : 'Put on hold'">
+                                            <span x-show="!onHold">Hold</span>
+                                            <span x-show="onHold">Resume</span>
+                                        </button>
                                         <button @click="editing = !editing; editTitle = '{{ $task->title }}'"
                                                 class="text-gray-400 hover:text-blue-500 text-sm">
                                             <span x-show="!editing">Edit</span>
@@ -959,6 +969,25 @@
                         }
                     } catch (error) {
                         console.error('Error deleting subtask:', error);
+                    }
+                },
+
+                async toggleOnHold(taskId) {
+                    try {
+                        const response = await fetch(`/projects/${this.projectHash}/parent-tasks/${taskId}/toggle-hold`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Error toggling on hold:', error);
                     }
                 }
             };

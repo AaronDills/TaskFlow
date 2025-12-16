@@ -9,16 +9,16 @@
         </h2>
     </x-slot>
 
-    <div class="py-4">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div id="project-content">
-                        
+    <div class="p-4 overflow-hidden" style="height: calc(100vh - 145px);">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 h-full">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg h-full">
+                <div class="p-6 text-gray-900 dark:text-gray-100 h-full">
+                    <div id="project-content" class="h-full">
+
                         <!-- 2-Column Layout -->
-                        <div class="flex flex-col lg:flex-row gap-6" style="height: 700px;">
+                        <div class="flex flex-col lg:flex-row gap-6 h-full">
                             <!-- Left Column: Time Calendar -->
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg flex-1 flex flex-col">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg flex-1 flex flex-col min-h-0 overflow-hidden">
                                 <div class="p-4 pb-2 flex-shrink-0">
                                     <div class="flex items-center justify-between">
                                         <div class="flex-1">
@@ -293,7 +293,10 @@
                 const slotMinute = parseInt(slot.dataset.minute);
 
                 if (slotHour === targetHour && slotMinute === targetMinute) {
-                    slot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Use scrollTop on the container instead of scrollIntoView
+                    // to prevent scrolling parent containers and losing the header
+                    const scrollTarget = slot.offsetTop - 20; // Small offset for better visibility
+                    calendar.scrollTo({ top: scrollTarget, behavior: 'smooth' });
                     break;
                 }
             }

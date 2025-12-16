@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/manage-tasks', [ScheduleController::class, 'index'])->name('projects.tasks');
     Route::post('/projects/{project}/parent-tasks', [ScheduleController::class, 'storeParentTask'])->name('parent-tasks.store');
     Route::put('/projects/{project}/parent-tasks/{task}', [ScheduleController::class, 'updateParentTask'])->name('parent-tasks.update');
+    Route::put('/projects/{project}/parent-tasks/{task}/toggle-hold', [ScheduleController::class, 'toggleOnHold'])->name('parent-tasks.toggle-hold');
     Route::delete('/projects/{project}/parent-tasks/{task}', [ScheduleController::class, 'destroyParentTask'])->name('parent-tasks.destroy');
     Route::post('/projects/{project}/parent-tasks/{parentTask}/subtasks', [ScheduleController::class, 'storeSubtask'])->name('subtasks.store');
     Route::put('/projects/{project}/subtasks/{subtask}', [ScheduleController::class, 'updateSubtask'])->name('subtasks.update');

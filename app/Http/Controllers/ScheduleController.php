@@ -255,6 +255,7 @@ class ScheduleController extends Controller
     /**
      * Get global recommended subtasks from all user's projects.
      * Excludes tasks moved to Must Do/May Do (category != 'recommended').
+     * Excludes subtasks from parent tasks that are on hold.
      * Auto-fills to 3 tasks when possible.
      */
     public function globalRecommended()
@@ -263,6 +264,7 @@ class ScheduleController extends Controller
         $projectIds = $user->projects()->pluck('id');
 
         // Get prioritized subtasks that are still in recommended category
+        // and whose parent task is not on hold
         $subtasks = Task::whereIn('project_id', $projectIds)
             ->whereNotNull('parent_id')
             ->where('completed', false)
@@ -270,6 +272,10 @@ class ScheduleController extends Controller
                 // Only include tasks in recommended category (not moved to must/may)
                 $query->where('category', 'recommended')
                     ->orWhereNull('category');
+            })
+            // Exclude subtasks from on-hold parent tasks
+            ->whereHas('parent', function ($query) {
+                $query->where('on_hold', false)->orWhereNull('on_hold');
             })
             ->orderByRaw("CASE
                 WHEN due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -280,7 +286,7 @@ class ScheduleController extends Controller
                 WHEN 'low' THEN 3 END")
             ->orderBy('due_date', 'asc')
             ->orderBy('created_at', 'asc')
-            ->with(['parent:id,title', 'project:id,name'])
+            ->with(['parent:id,title,on_hold', 'project:id,name'])
             ->limit(3)
             ->get();
 
@@ -521,7 +527,7 @@ class ScheduleController extends Controller
             'scheduled_date' => now()->toDateString(), // Tasks only show on the day they're moved
         ]);
 
-        // Return updated recommended list (only tasks still in recommended category)
+        // Return updated recommended list (only tasks still in recommended category and not from on-hold parents)
         $projectIds = $user->projects()->pluck('id');
         $recommended = Task::whereIn('project_id', $projectIds)
             ->whereNotNull('parent_id')
@@ -529,6 +535,9 @@ class ScheduleController extends Controller
             ->where(function ($query) {
                 $query->where('category', 'recommended')
                     ->orWhereNull('category');
+            })
+            ->whereHas('parent', function ($query) {
+                $query->where('on_hold', false)->orWhereNull('on_hold');
             })
             ->orderByRaw("CASE
                 WHEN due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -539,7 +548,7 @@ class ScheduleController extends Controller
                 WHEN 'low' THEN 3 END")
             ->orderBy('due_date', 'asc')
             ->orderBy('created_at', 'asc')
-            ->with(['parent:id,title', 'project:id,name'])
+            ->with(['parent:id,title,on_hold', 'project:id,name'])
             ->limit(3)
             ->get();
 
@@ -547,5 +556,25 @@ class ScheduleController extends Controller
             'task' => $subtask->fresh(),
             'recommended' => $recommended,
         ]);
+    }
+
+    /**
+     * Toggle a parent task's on_hold status.
+     */
+    public function toggleOnHold(Request $request, Project $project, Task $task)
+    {
+        if ($project->user_id !== Auth::id() || $task->project_id !== $project->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (!$task->is_parent) {
+            return response()->json(['error' => 'Only parent tasks can be put on hold'], 400);
+        }
+
+        $task->update([
+            'on_hold' => !$task->on_hold,
+        ]);
+
+        return response()->json($task->load('subtasks'));
     }
 }

@@ -18,6 +18,7 @@ class Task extends Model
         'due_date',
         'deadline',
         'is_parent',
+        'on_hold',
         'description',
         'completed',
         'completed_at',
@@ -29,6 +30,7 @@ class Task extends Model
     protected $casts = [
         'completed' => 'boolean',
         'is_parent' => 'boolean',
+        'on_hold' => 'boolean',
         'scheduled_date' => 'date',
         'due_date' => 'date',
         'deadline' => 'date',

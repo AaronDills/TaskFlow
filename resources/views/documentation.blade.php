@@ -207,7 +207,7 @@
                                 <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
                                     <li><strong>Must Do:</strong> High-priority tasks that need to be completed today</li>
                                     <li><strong>May Do:</strong> Lower-priority tasks you can work on if time permits</li>
-                                    <li><strong>Recommended:</strong> Smart suggestions from your projects based on priority and due dates</li>
+                                    <li><strong>Recommended:</strong> Smart suggestions from your projects based on priority and due dates (excludes subtasks from parent tasks that are on hold)</li>
                                 </ul>
 
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Managing Tasks</h3>
@@ -292,8 +292,18 @@
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Parent Tasks</h3>
                                 <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
                                     <li>Parent tasks represent major milestones or phases of your project</li>
-                                    <li>Create a parent task by clicking "Add Parent Task" within a project</li>
+                                    <li>Create a parent task by clicking "New Task" within a project</li>
                                     <li>Each parent task can contain multiple subtasks</li>
+                                    <li>Set an optional deadline that subtasks will inherit by default</li>
+                                    <li>Put a parent task "On Hold" to temporarily pause work and exclude its subtasks from recommendations</li>
+                                </ul>
+
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Putting Tasks On Hold</h3>
+                                <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>Click the "Hold" button on any parent task to put it on hold</li>
+                                    <li>On-hold tasks appear dimmed with a yellow "On Hold" badge</li>
+                                    <li>Subtasks from on-hold parent tasks will not appear in the Recommended section</li>
+                                    <li>Click "Resume" to take a task off hold and restore its subtasks to recommendations</li>
                                 </ul>
 
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Subtasks</h3>
@@ -312,9 +322,15 @@
                                 </ul>
 
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Smart Recommendations</h3>
-                                <p class="text-gray-600 dark:text-gray-300">
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">
                                     The system automatically recommends subtasks on your Daily Schedule based on their priority and due dates, helping you focus on what matters most.
                                 </p>
+                                <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>High priority subtasks appear before medium and low priority ones</li>
+                                    <li>Subtasks with due dates within 7 days are prioritized</li>
+                                    <li>Only incomplete subtasks are shown</li>
+                                    <li>Subtasks from parent tasks that are on hold are excluded</li>
+                                </ul>
                             </div>
                         </div>
 
@@ -344,7 +360,8 @@
 
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">Recurring Events</h3>
                                 <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
-                                    <li>Set events to repeat daily, weekly, or monthly</li>
+                                    <li>Set events to repeat daily, weekly, bi-weekly, monthly, or yearly</li>
+                                    <li>Optionally set an end date for the recurrence</li>
                                     <li>Recurring events appear on all applicable days</li>
                                     <li>Edit or delete individual occurrences or the entire series</li>
                                 </ul>

@@ -14,9 +14,9 @@ Route::get('/', function () {
     return view('landing');
 })->name('home');
 
-Route::get('/documentation', function () {
-    return view('documentation');
-})->name('documentation');
+Route::get('/guide', function () {
+    return view('guide');
+})->name('guide');
 
 Route::get('/todo', function () {
     $projects = Auth::user()->projects()->latest()->get();

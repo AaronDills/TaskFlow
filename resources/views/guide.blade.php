@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Documentation - {{ config('app.name', 'TaskFlow') }}</title>
+        <title>Guide - {{ config('app.name', 'TaskFlow') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

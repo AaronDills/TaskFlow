@@ -29,8 +29,8 @@
                 </div>
                 @if (Route::has('login'))
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('documentation') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
-                            Documentation
+                        <a href="{{ route('guide') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                            Guide
                         </a>
                         @auth
                             <a href="{{ url('/todo') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">

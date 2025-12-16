@@ -84,7 +84,7 @@
                                                     {{ $project->description ?? '' }}&nbsp;
                                                 </p>
                                                 @if($project->label)
-                                                    <span class="text-xs font-medium {{ $project->label->text_class }} flex-shrink-0 pt-0.5">
+                                                    <span class="text-xs font-medium {{ $project->label->text_class }} flex-shrink-0 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded">
                                                         {{ $project->label->name }}
                                                     </span>
                                                 @endif

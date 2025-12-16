@@ -111,7 +111,7 @@ class EventController extends Controller
             'start_datetime' => 'required|date',
             'end_datetime' => 'required|date|after:start_datetime',
             'color' => 'in:blue,green,red,purple,yellow,pink,indigo,gray',
-            'recurrence' => 'nullable|in:daily,weekly,monthly,yearly',
+            'recurrence' => 'nullable|in:daily,weekly,biweekly,monthly,yearly',
             'recurrence_end_date' => 'nullable|date|after:start_datetime',
         ]);
 
@@ -149,7 +149,7 @@ class EventController extends Controller
             'start_datetime' => 'sometimes|required|date',
             'end_datetime' => 'sometimes|required|date|after:start_datetime',
             'color' => 'sometimes|in:blue,green,red,purple,yellow,pink,indigo,gray',
-            'recurrence' => 'nullable|in:daily,weekly,monthly,yearly',
+            'recurrence' => 'nullable|in:daily,weekly,biweekly,monthly,yearly',
             'recurrence_end_date' => 'nullable|date',
         ]);
 
@@ -201,6 +201,7 @@ class EventController extends Controller
         $increment = match($parentEvent->recurrence) {
             'daily' => fn($d) => $d->addDay(),
             'weekly' => fn($d) => $d->addWeek(),
+            'biweekly' => fn($d) => $d->addWeeks(2),
             'monthly' => fn($d) => $d->addMonth(),
             'yearly' => fn($d) => $d->addYear(),
             default => null,

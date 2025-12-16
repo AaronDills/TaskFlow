@@ -60,8 +60,8 @@ return new class extends Migration
 
         // Add indexes to events table
         $this->addIndexIfNotExists('events', 'user_id');
-        $this->addIndexIfNotExists('events', 'start_date');
-        $this->addIndexIfNotExists('events', 'end_date');
+        $this->addIndexIfNotExists('events', 'start_datetime');
+        $this->addIndexIfNotExists('events', 'end_datetime');
 
         // Add indexes to labels table
         $this->addIndexIfNotExists('labels', 'user_id');
@@ -77,7 +77,7 @@ return new class extends Migration
             'tasks' => ['tasks_project_id_index', 'tasks_parent_id_index', 'tasks_user_id_index',
                        'tasks_completed_index', 'tasks_scheduled_date_index',
                        'tasks_user_id_category_index', 'tasks_user_id_completed_completed_at_index'],
-            'events' => ['events_user_id_index', 'events_start_date_index', 'events_end_date_index'],
+            'events' => ['events_user_id_index', 'events_start_datetime_index', 'events_end_datetime_index'],
             'labels' => ['labels_user_id_index'],
         ];
 

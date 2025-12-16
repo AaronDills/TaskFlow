@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+    networks:
+      - todo-network
+
+  # Optional: Add MySQL database service if you want to switch from SQLite
+  # mysql:
+  #   image: mysql:8.0
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     MYSQL_DATABASE: todo_app
+  #     MYSQL_ROOT_PASSWORD: secret
+  #     MYSQL_PASSWORD: secret
+  #     MYSQL_USER: laravel
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   networks:
+  #     - todo-network
+
+  # Optional: Add Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - todo-network
+
+networks:
+  todo-network:
+    driver: bridge
+
+# volumes:
+#   mysql_data:

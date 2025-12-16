@@ -19,8 +19,6 @@ return new class extends Migration
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
             $table->string('color', 20)->default('blue');
-            $table->string('location')->nullable();
-            $table->string('reminder')->nullable();
             $table->string('recurrence')->nullable();
             $table->date('recurrence_end_date')->nullable();
             $table->unsignedBigInteger('parent_event_id')->nullable();

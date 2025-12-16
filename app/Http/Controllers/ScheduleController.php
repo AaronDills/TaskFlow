@@ -272,7 +272,7 @@ class ScheduleController extends Controller
                     ->orWhereNull('category');
             })
             ->orderByRaw("CASE
-                WHEN due_date IS NOT NULL AND due_date <= date('now', '+7 days')
+                WHEN due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
                 THEN 0 ELSE 1 END")
             ->orderByRaw("CASE priority
                 WHEN 'high' THEN 1
@@ -531,7 +531,7 @@ class ScheduleController extends Controller
                     ->orWhereNull('category');
             })
             ->orderByRaw("CASE
-                WHEN due_date IS NOT NULL AND due_date <= date('now', '+7 days')
+                WHEN due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
                 THEN 0 ELSE 1 END")
             ->orderByRaw("CASE priority
                 WHEN 'high' THEN 1

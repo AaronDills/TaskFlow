@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->date('scheduled_date')->nullable()->after('order');
-            $table->time('scheduled_time')->nullable()->after('scheduled_date');
+            $table->string('scheduled_time')->nullable()->after('scheduled_date');
         });
     }
 

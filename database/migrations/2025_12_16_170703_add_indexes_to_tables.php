@@ -8,17 +8,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Check if an index exists (SQLite compatible)
+     * Check if an index exists (MySQL compatible)
      */
     private function indexExists(string $table, string $indexName): bool
     {
-        $indexes = DB::select("PRAGMA index_list('$table')");
-        foreach ($indexes as $index) {
-            if ($index->name === $indexName) {
-                return true;
-            }
-        }
-        return false;
+        $database = config('database.connections.mysql.database');
+        $indexes = DB::select("
+            SELECT INDEX_NAME
+            FROM INFORMATION_SCHEMA.STATISTICS
+            WHERE TABLE_SCHEMA = ?
+            AND TABLE_NAME = ?
+            AND INDEX_NAME = ?
+        ", [$database, $table, $indexName]);
+
+        return count($indexes) > 0;
     }
 
     /**
@@ -69,8 +72,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Note: In SQLite, dropping indexes is tricky if the table was modified
-        // These are safe no-ops if indexes don't exist
         $indexes = [
             'projects' => ['projects_user_id_index', 'projects_label_id_index', 'projects_status_index'],
             'tasks' => ['tasks_project_id_index', 'tasks_parent_id_index', 'tasks_user_id_index',

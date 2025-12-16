@@ -14,6 +14,10 @@ Route::get('/', function () {
     return view('landing');
 })->name('home');
 
+Route::get('/documentation', function () {
+    return view('documentation');
+})->name('documentation');
+
 Route::get('/todo', function () {
     $projects = Auth::user()->projects()->latest()->get();
     return view('todo', compact('projects'));

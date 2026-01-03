@@ -60,63 +60,33 @@
                                 </div>
                             </div>
                             
-                            <!-- Right Column: Three Task Categories (Stacked Vertically) -->
+                            <!-- Right Column: Two Task Categories (Stacked Vertically) -->
                             <div class="flex flex-col gap-4 flex-1 overflow-hidden">
-                                <!-- Must Do Tasks -->
+                                <!-- To Do Tasks -->
                                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex-1 flex flex-col min-h-0">
                                     <div class="mb-3">
-                                        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Must Do</h4>
+                                        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200">To Do</h4>
                                     </div>
-                                    
-                                    <!-- Add Task Form -->
-                                    <div id="add-task-form-must" class="hidden mb-4 p-3 bg-white dark:bg-gray-800 rounded border">
-                                        <input type="text" id="new-task-title-must" placeholder="Task title..." 
-                                               class="w-full text-sm border border-gray-300 dark:border-gray-500 rounded px-2 py-1 mb-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                               onkeydown="if(event.key==='Enter') { event.preventDefault(); event.stopPropagation(); addTask('must'); }">
-                                        <div class="flex gap-2">
-                                            <button onclick="addTask('must')" class="px-3 py-1 text-white hover:underline text-sm">
-                                                Add
-                                            </button>
-                                            <button onclick="hideAddTaskForm('must')" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Tasks List -->
-                                    <div id="tasks-list-must" class="flex-1 overflow-y-auto min-h-0 transition-all duration-150 rounded-lg" ondblclick="showAddTaskFormInline('must', event)">
-                                        <!-- Tasks will be populated by JavaScript -->
-                                        <div class="text-gray-500 dark:text-gray-400 text-sm text-center py-8 cursor-pointer" ondblclick="showAddTaskFormInline('must', event)">
-                                            Double-click to add a task
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <!-- May Do Tasks -->
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex-1 flex flex-col min-h-0">
-                                    <div class="mb-3">
-                                        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200">May Do</h4>
-                                    </div>
-                                    
                                     <!-- Add Task Form -->
-                                    <div id="add-task-form-may" class="hidden mb-4 p-3 bg-white dark:bg-gray-800 rounded border">
-                                        <input type="text" id="new-task-title-may" placeholder="Task title..." 
+                                    <div id="add-task-form-todo" class="hidden mb-4 p-3 bg-white dark:bg-gray-800 rounded border">
+                                        <input type="text" id="new-task-title-todo" placeholder="Task title..."
                                                class="w-full text-sm border border-gray-300 dark:border-gray-500 rounded px-2 py-1 mb-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                                               onkeydown="if(event.key==='Enter') { event.preventDefault(); event.stopPropagation(); addTask('may'); }">
+                                               onkeydown="if(event.key==='Enter') { event.preventDefault(); event.stopPropagation(); addTask('todo'); }">
                                         <div class="flex gap-2">
-                                            <button onclick="addTask('may')" class="px-3 py-1 text-white hover:underline text-sm">
+                                            <button onclick="addTask('todo')" class="px-3 py-1 text-white hover:underline text-sm">
                                                 Add
                                             </button>
-                                            <button onclick="hideAddTaskForm('may')" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
+                                            <button onclick="hideAddTaskForm('todo')" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
                                                 Cancel
                                             </button>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Tasks List -->
-                                    <div id="tasks-list-may" class="flex-1 overflow-y-auto min-h-0 transition-all duration-150 rounded-lg" ondblclick="showAddTaskFormInline('may', event)">
+                                    <div id="tasks-list-todo" class="flex-1 overflow-y-auto min-h-0 transition-all duration-150 rounded-lg" ondblclick="showAddTaskFormInline('todo', event)">
                                         <!-- Tasks will be populated by JavaScript -->
-                                        <div class="text-gray-500 dark:text-gray-400 text-sm text-center py-8 cursor-pointer" ondblclick="showAddTaskFormInline('may', event)">
+                                        <div class="text-gray-500 dark:text-gray-400 text-sm text-center py-8 cursor-pointer" ondblclick="showAddTaskFormInline('todo', event)">
                                             Double-click to add a task
                                         </div>
                                     </div>
@@ -1539,7 +1509,7 @@
             }
         }
 
-        // Load standalone tasks for Must Do / May Do sections
+        // Load standalone tasks for To Do section
         async function loadStandaloneTasks() {
             try {
                 const response = await fetch('/schedule/tasks', {
@@ -1551,8 +1521,7 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    renderStandaloneTasks('must', data.must || []);
-                    renderStandaloneTasks('may', data.may || []);
+                    renderStandaloneTasks('todo', data.todo || []);
                 }
             } catch (error) {
                 console.error('Error loading standalone tasks:', error);
@@ -1691,8 +1660,7 @@
         let draggedTaskId = null;
         let draggedSubtaskId = null;
         let draggedIsProjectTask = false;
-        let currentMustTasks = [];
-        let currentMayTasks = [];
+        let currentTodoTasks = [];
 
         function handleTaskDragStart(event, taskId, isProjectTask) {
             draggedTaskId = taskId;
@@ -1869,34 +1837,23 @@
             if (!response.ok) return;
 
             const data = await response.json();
-            let mustTasks = [...(data.must || [])];
-            let mayTasks = [...(data.may || [])];
+            let todoTasks = [...(data.todo || [])];
 
             // Find and remove the dragged task from its current position
-            const draggedFromMust = mustTasks.findIndex(t => t.id === taskId);
-            const draggedFromMay = mayTasks.findIndex(t => t.id === taskId);
+            const draggedIndex = todoTasks.findIndex(t => t.id === taskId);
 
             let draggedTask = null;
-            if (draggedFromMust !== -1) {
-                draggedTask = mustTasks.splice(draggedFromMust, 1)[0];
-            } else if (draggedFromMay !== -1) {
-                draggedTask = mayTasks.splice(draggedFromMay, 1)[0];
+            if (draggedIndex !== -1) {
+                draggedTask = todoTasks.splice(draggedIndex, 1)[0];
             }
 
             if (!draggedTask) return;
 
             // Insert at new position
-            if (newCategory === 'must') {
-                mustTasks.splice(targetIndex, 0, { ...draggedTask, category: 'must' });
-            } else {
-                mayTasks.splice(targetIndex, 0, { ...draggedTask, category: 'may' });
-            }
+            todoTasks.splice(targetIndex, 0, { ...draggedTask, category: 'todo' });
 
             // Build reorder payload
-            const tasks = [
-                ...mustTasks.map((t, i) => ({ id: t.id, order: i, category: 'must' })),
-                ...mayTasks.map((t, i) => ({ id: t.id, order: i, category: 'may' }))
-            ];
+            const tasks = todoTasks.map((t, i) => ({ id: t.id, order: i, category: 'todo' }));
 
             try {
                 await fetch('/schedule/tasks/reorder', {

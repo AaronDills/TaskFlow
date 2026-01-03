@@ -38,6 +38,12 @@
                         Projects
                         <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ $projects->count() }}</span>
                     </button>
+                    <button @click="activeTab = 'archived'"
+                            :class="activeTab === 'archived' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        Archived
+                        <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ $archivedProjects->count() }}</span>
+                    </button>
                     <button @click="activeTab = 'labels'"
                             :class="activeTab === 'labels' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'"
                             class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
@@ -151,6 +157,98 @@
                                             <a href="{{ route('projects.tasks', $project) }}"
                                                class="block text-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/90 dark:bg-gray-800/90 rounded-md hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-600 transition-colors">
                                                 Open
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            <!-- Archived Tab -->
+            <div x-show="activeTab === 'archived'" x-transition>
+                @if($archivedProjects->isEmpty())
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">No archived projects</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Completed projects will appear here.</p>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach($archivedProjects as $project)
+                            <div class="relative overflow-hidden shadow-sm rounded-lg hover:shadow-md transition-shadow h-full flex flex-col {{ $project->label ? $project->label->bg_class . ' ' . $project->label->border_class . ' border' : 'bg-white dark:bg-gray-800' }} opacity-75">
+                                <div class="p-6 flex flex-col flex-1">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div class="flex-1 min-w-0 pr-8">
+                                            <a href="{{ route('projects.tasks', $project) }}" class="block">
+                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-blue-600 dark:hover:text-blue-400">
+                                                    {{ $project->name }}
+                                                </h3>
+                                            </a>
+                                            <div class="mt-1 flex items-start justify-between gap-2 min-h-[2.5rem]">
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
+                                                    {{ $project->description ?? '' }}&nbsp;
+                                                </p>
+                                                @if($project->label)
+                                                    <span class="text-xs font-medium {{ $project->label->text_class }} flex-shrink-0 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded">
+                                                        {{ $project->label->name }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="relative" x-data="{ open: false }">
+                                                <button @click="open = !open" class="p-1 rounded-full hover:bg-white/50 dark:hover:bg-gray-700/50">
+                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                                    </svg>
+                                                </button>
+                                                <div x-show="open" @click.away="open = false" x-transition
+                                                     class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg py-1 z-10">
+                                                    <a href="{{ route('projects.tasks', $project) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                                        View Project
+                                                    </a>
+                                                    <button onclick="restoreProject('{{ $project->hash }}')"
+                                                            class="block w-full text-left px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                                        Restore to Active
+                                                    </button>
+                                                    <button onclick="deleteProject('{{ $project->hash }}', '{{ $project->name }}')"
+                                                            class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                                        Delete Permanently
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-auto">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                                </svg>
+                                                {{ $project->tasks_count ?? 0 }} tasks
+                                            </div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500">
+                                                {{ $project->created_at->diffForHumans() }}
+                                            </div>
+                                        </div>
+
+                                        <div class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-600">
+                                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Completed
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <a href="{{ route('projects.tasks', $project) }}"
+                                               class="block text-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/90 dark:bg-gray-800/90 rounded-md hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-600 transition-colors">
+                                                View
                                             </a>
                                         </div>
                                     </div>
@@ -368,6 +466,28 @@
                     window.location.reload();
                 } else {
                     alert('Failed to delete project.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function restoreProject(hash) {
+            try {
+                const response = await fetch(`/projects/${hash}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'in_progress' })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to restore project.');
                 }
             } catch (error) {
                 alert('An error occurred. Please try again.');

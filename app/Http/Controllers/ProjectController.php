@@ -14,16 +14,20 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        $projects = Auth::user()->projects()->with('label')->withCount('tasks')->latest()->get();
+        $allProjects = Auth::user()->projects()->with('label')->withCount('tasks')->latest()->get();
+
+        // Separate active and archived (done) projects
+        $projects = $allProjects->filter(fn($p) => $p->status !== Project::STATUS_DONE);
+        $archivedProjects = $allProjects->filter(fn($p) => $p->status === Project::STATUS_DONE);
 
         $labels = Auth::user()->labels()->withCount('projects')->orderBy('name')->get();
 
         // Return JSON for AJAX requests
         if ($request->wantsJson()) {
-            return response()->json($projects);
+            return response()->json($allProjects);
         }
 
-        return view('projects.index', compact('projects', 'labels'));
+        return view('projects.index', compact('projects', 'archivedProjects', 'labels'));
     }
 
     /**

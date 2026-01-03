@@ -254,8 +254,9 @@ class ScheduleController extends Controller
 
     /**
      * Get global recommended subtasks from all user's projects.
-     * Excludes tasks moved to Must Do/May Do (category != 'recommended').
+     * Excludes tasks moved to To Do (category != 'recommended').
      * Excludes subtasks from parent tasks that are on hold.
+     * Only shows ONE task per parent task (subproject) at a time.
      * Auto-fills to 3 tasks when possible.
      */
     public function globalRecommended()
@@ -263,13 +264,13 @@ class ScheduleController extends Controller
         $user = Auth::user();
         $projectIds = $user->projects()->pluck('id');
 
-        // Get prioritized subtasks that are still in recommended category
+        // Get all prioritized subtasks that are still in recommended category
         // and whose parent task is not on hold
-        $subtasks = Task::whereIn('project_id', $projectIds)
+        $allSubtasks = Task::whereIn('project_id', $projectIds)
             ->whereNotNull('parent_id')
             ->where('completed', false)
             ->where(function ($query) {
-                // Only include tasks in recommended category (not moved to must/may)
+                // Only include tasks in recommended category (not moved to todo)
                 $query->where('category', 'recommended')
                     ->orWhereNull('category');
             })
@@ -287,8 +288,17 @@ class ScheduleController extends Controller
             ->orderBy('due_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->with(['parent:id,title,on_hold', 'project:id,name'])
-            ->limit(3)
             ->get();
+
+        // Filter to only one task per parent_id (subproject)
+        $seenParents = [];
+        $subtasks = $allSubtasks->filter(function ($task) use (&$seenParents) {
+            if (in_array($task->parent_id, $seenParents)) {
+                return false;
+            }
+            $seenParents[] = $task->parent_id;
+            return true;
+        })->take(3)->values();
 
         return response()->json($subtasks);
     }
@@ -321,13 +331,39 @@ class ScheduleController extends Controller
             }
         }
 
-        // Return updated global recommended list
+        // Return updated global recommended list with one-per-parent logic
         $projectIds = $user->projects()->pluck('id');
-        $recommended = Task::whereIn('project_id', $projectIds)
-            ->prioritized()
-            ->with(['parent:id,title', 'project:id,name'])
-            ->limit(3)
+        $allRecommended = Task::whereIn('project_id', $projectIds)
+            ->whereNotNull('parent_id')
+            ->where('completed', false)
+            ->where(function ($query) {
+                $query->where('category', 'recommended')
+                    ->orWhereNull('category');
+            })
+            ->whereHas('parent', function ($query) {
+                $query->where('on_hold', false)->orWhereNull('on_hold');
+            })
+            ->orderByRaw("CASE
+                WHEN due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+                THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE priority
+                WHEN 'high' THEN 1
+                WHEN 'med' THEN 2
+                WHEN 'low' THEN 3 END")
+            ->orderBy('due_date', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->with(['parent:id,title,on_hold', 'project:id,name'])
             ->get();
+
+        // Filter to only one task per parent_id (subproject)
+        $seenParents = [];
+        $recommended = $allRecommended->filter(function ($task) use (&$seenParents) {
+            if (in_array($task->parent_id, $seenParents)) {
+                return false;
+            }
+            $seenParents[] = $task->parent_id;
+            return true;
+        })->take(3)->values();
 
         return response()->json([
             'subtask' => $subtask->fresh(),
@@ -336,16 +372,15 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Get tasks for Must Do / May Do sections.
+     * Get tasks for To Do section.
      * Includes both standalone tasks and moved project tasks.
+     * Uncompleted tasks from previous days carry over automatically.
      */
     public function getStandaloneTasks()
     {
         $user = Auth::user();
         $projectIds = $user->projects()->pluck('id');
 
-        // Get standalone tasks (no project) and moved project tasks (have project but category is must/may)
-        // Only show tasks scheduled for today - each day starts fresh
         $today = now()->toDateString();
         $todayStart = now()->startOfDay();
         $todayEnd = now()->endOfDay();
@@ -361,15 +396,23 @@ class ScheduleController extends Controller
                         // Moved project tasks
                         $q->whereIn('project_id', $projectIds)
                             ->whereNotNull('parent_id')
-                            ->whereIn('category', ['must', 'may']);
+                            ->where('category', 'todo');
                     });
             })
             ->where(function ($query) use ($today, $todayStart, $todayEnd) {
-                // Tasks with scheduled_date = today, OR tasks created today without scheduled_date
+                // Tasks from today (scheduled_date = today OR created today)
                 $query->where('scheduled_date', $today)
                     ->orWhere(function ($q) use ($todayStart, $todayEnd) {
                         $q->whereNull('scheduled_date')
                             ->whereBetween('created_at', [$todayStart, $todayEnd]);
+                    })
+                    // Carry over: uncompleted tasks from previous days
+                    ->orWhere(function ($q) use ($today) {
+                        $q->where('completed', false)
+                            ->where(function ($inner) use ($today) {
+                                $inner->where('scheduled_date', '<', $today)
+                                    ->orWhereNull('scheduled_date');
+                            });
                     });
             })
             ->orderBy('completed') // Show incomplete tasks first
@@ -380,23 +423,21 @@ class ScheduleController extends Controller
                 // Add flag to indicate if this is a project task (can be moved back to recommended)
                 $task->is_project_task = !is_null($task->project_id) && !is_null($task->parent_id);
                 return $task;
-            })
-            ->groupBy('category');
+            });
 
         return response()->json([
-            'must' => $tasks->get('must', collect())->values(),
-            'may' => $tasks->get('may', collect())->values(),
+            'todo' => $tasks->values(),
         ]);
     }
 
     /**
-     * Store a new standalone task (Must Do / May Do).
+     * Store a new standalone task (To Do).
      */
     public function storeStandaloneTask(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|in:must,may',
+            'category' => 'required|in:todo',
         ]);
 
         $user = Auth::user();
@@ -431,7 +472,7 @@ class ScheduleController extends Controller
 
         $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'category' => 'sometimes|in:must,may',
+            'category' => 'sometimes|in:todo',
             'order' => 'sometimes|integer',
             'completed' => 'sometimes|boolean',
         ]);
@@ -458,7 +499,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Reorder tasks in Must Do / May Do sections.
+     * Reorder tasks in To Do section.
      */
     public function reorderTasks(Request $request)
     {
@@ -466,7 +507,7 @@ class ScheduleController extends Controller
             'tasks' => 'required|array',
             'tasks.*.id' => 'required|integer',
             'tasks.*.order' => 'required|integer',
-            'tasks.*.category' => 'required|in:must,may',
+            'tasks.*.category' => 'required|in:todo',
         ]);
 
         $user = Auth::user();
@@ -493,7 +534,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Move a subtask from Recommended to Must Do / May Do.
+     * Move a subtask from Recommended to To Do.
      * Keeps project_id and parent_id so it can be moved back.
      */
     public function moveSubtaskToStandalone(Request $request, Task $subtask)
@@ -511,13 +552,12 @@ class ScheduleController extends Controller
         }
 
         $request->validate([
-            'category' => 'required|in:must,may',
+            'category' => 'required|in:todo',
         ]);
 
-        // Moving to Must Do or May Do
+        // Moving to To Do
         $maxOrder = Task::where('user_id', $user->id)
-            ->whereIn('category', ['must', 'may'])
-            ->where('category', $request->category)
+            ->where('category', 'todo')
             ->max('order') ?? -1;
 
         $subtask->update([
@@ -527,9 +567,9 @@ class ScheduleController extends Controller
             'scheduled_date' => now()->toDateString(), // Tasks only show on the day they're moved
         ]);
 
-        // Return updated recommended list (only tasks still in recommended category and not from on-hold parents)
+        // Return updated recommended list with one-per-parent logic
         $projectIds = $user->projects()->pluck('id');
-        $recommended = Task::whereIn('project_id', $projectIds)
+        $allRecommended = Task::whereIn('project_id', $projectIds)
             ->whereNotNull('parent_id')
             ->where('completed', false)
             ->where(function ($query) {
@@ -549,8 +589,17 @@ class ScheduleController extends Controller
             ->orderBy('due_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->with(['parent:id,title,on_hold', 'project:id,name'])
-            ->limit(3)
             ->get();
+
+        // Filter to only one task per parent_id (subproject)
+        $seenParents = [];
+        $recommended = $allRecommended->filter(function ($task) use (&$seenParents) {
+            if (in_array($task->parent_id, $seenParents)) {
+                return false;
+            }
+            $seenParents[] = $task->parent_id;
+            return true;
+        })->take(3)->values();
 
         return response()->json([
             'task' => $subtask->fresh(),

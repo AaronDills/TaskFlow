@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Label::class);
     }
+
+    public function featureRequests(): HasMany
+    {
+        return $this->hasMany(FeatureRequest::class);
+    }
 }

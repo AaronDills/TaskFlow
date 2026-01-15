@@ -19,26 +19,21 @@
                     $statusCounts = [
                         'pending' => $featureRequests->where('status', 'pending')->count(),
                         'processing' => $featureRequests->where('status', 'processing')->count(),
-                        'completed' => $featureRequests->where('status', 'completed')->count(),
-                        'failed' => $featureRequests->where('status', 'failed')->count(),
+                        'completed' => $featureRequests->whereIn('status', ['completed', 'failed'])->count(),
                     ];
                 @endphp
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $statusCounts['pending'] }}</div>
-                        <div class="text-sm text-yellow-700 dark:text-yellow-300">Awaiting Review</div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ $statusCounts['pending'] }}</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Not Acknowledged</div>
                     </div>
                     <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
                         <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $statusCounts['processing'] }}</div>
-                        <div class="text-sm text-blue-700 dark:text-blue-300">In Progress</div>
+                        <div class="text-sm text-blue-700 dark:text-blue-300">In Process</div>
                     </div>
                     <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
                         <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $statusCounts['completed'] }}</div>
-                        <div class="text-sm text-green-700 dark:text-green-300">Ready for Review</div>
-                    </div>
-                    <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $statusCounts['failed'] }}</div>
-                        <div class="text-sm text-red-700 dark:text-red-300">Needs Attention</div>
+                        <div class="text-sm text-green-700 dark:text-green-300">Ready for Approval</div>
                     </div>
                 </div>
             @endif
@@ -122,28 +117,28 @@
                                     ];
                                     $statusConfig = [
                                         'pending' => [
-                                            'label' => 'Awaiting Review',
-                                            'color' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                                            'label' => 'Not Acknowledged',
+                                            'color' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                                             'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-                                            'description' => 'Your request has been received and is waiting to be reviewed.',
+                                            'description' => 'Your request has been received and is waiting to be picked up.',
                                         ],
                                         'processing' => [
-                                            'label' => 'In Progress',
+                                            'label' => 'In Process',
                                             'color' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
                                             'icon' => '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
-                                            'description' => 'AI is analyzing your request and preparing recommendations.',
+                                            'description' => 'A worker is currently processing your request.',
                                         ],
                                         'completed' => [
-                                            'label' => 'Ready for Review',
+                                            'label' => 'Ready for Approval',
                                             'color' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
                                             'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-                                            'description' => 'Analysis complete! Check the GitHub issue for details.',
+                                            'description' => 'PR created and waiting for your approval.',
                                         ],
                                         'failed' => [
-                                            'label' => 'Needs Attention',
-                                            'color' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-                                            'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-                                            'description' => 'There was an issue processing your request. We\'ll look into it.',
+                                            'label' => 'Ready for Approval',
+                                            'color' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                                            'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                                            'description' => 'Processing completed - please review.',
                                         ],
                                     ];
                                     $status = $statusConfig[$request->status] ?? $statusConfig['pending'];

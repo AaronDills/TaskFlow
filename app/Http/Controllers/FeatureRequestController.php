@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessFeatureRequest;
 use App\Models\FeatureRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,9 @@ class FeatureRequestController extends Controller
             'priority' => $validated['priority'],
             'status' => FeatureRequest::STATUS_PENDING,
         ]);
+
+        // Dispatch job immediately to process the request
+        ProcessFeatureRequest::dispatch($featureRequest);
 
         if ($request->wantsJson()) {
             return response()->json($featureRequest, 201);

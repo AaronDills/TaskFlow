@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FeatureRequestController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\ProfileController;
@@ -91,6 +92,9 @@ Route::middleware('auth')->group(function () {
     // History
     Route::get('/history', [HistoryController::class, 'index'])->name('history');
     Route::get('/history/week', [HistoryController::class, 'getWeekData'])->name('history.week');
+
+    // User Feedback (available to all authenticated users)
+    Route::post('/submit-feedback', [FeedbackController::class, 'store'])->name('submit-feedback.store');
 
     // Feedback & Feature Requests (restricted to specific emails)
     Route::middleware('restricted.email')->group(function () {

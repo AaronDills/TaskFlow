@@ -8,10 +8,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Check if an index exists (MySQL compatible)
+     * Check if an index exists (MySQL and SQLite compatible)
      */
     private function indexExists(string $table, string $indexName): bool
     {
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            $indexes = DB::select("
+                SELECT name FROM sqlite_master
+                WHERE type = 'index' AND tbl_name = ? AND name = ?
+            ", [$table, $indexName]);
+            return count($indexes) > 0;
+        }
+
+        // MySQL
         $database = config('database.connections.mysql.database');
         $indexes = DB::select("
             SELECT INDEX_NAME

@@ -108,6 +108,10 @@
                                                     <a href="{{ route('projects.tasks', $project) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                                         Open Project
                                                     </a>
+                                                    <button onclick="archiveProject('{{ $project->hash }}')"
+                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                                        Archive
+                                                    </button>
                                                     <button onclick="deleteProject('{{ $project->hash }}', '{{ $project->name }}')"
                                                             class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
                                                         Delete
@@ -488,6 +492,28 @@
                     window.location.reload();
                 } else {
                     alert('Failed to restore project.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function archiveProject(hash) {
+            try {
+                const response = await fetch(`/projects/${hash}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'done' })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to archive project.');
                 }
             } catch (error) {
                 alert('An error occurred. Please try again.');
